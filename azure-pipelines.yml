@@ -1,0 +1,30 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'mini-devops-app'
+
+steps:
+
+- checkout: self
+
+- script: |
+    echo "Building Docker image..."
+    docker build -t $(imageName) .
+  displayName: 'Build Docker Image'
+
+- script: |
+    echo "Tagging image for Docker Hub..."
+    docker tag $(imageName) kesavakiran/$(imageName):latest
+  displayName: 'Tag Image'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: 'DockerHubConnection'
+    command: 'push'
+    repository: 'kesavakiran/$(imageName)'
+    tags: 'latest'
+  displayName: 'Push Image to Docker Hub'
